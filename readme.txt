@@ -29,6 +29,14 @@ doesn't show username in error message.
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. You can activate or deactivate desired individual options from Settings > Smart WP Login.
 
+== Screenshots ==
+
+1. Login using Email
+2. Error message for login
+3. Wow, good error message, no WordPress default error
+4. Register using Email
+5. Retrieve password using Email
+
 == Changelog ==
 
 = 0.9 =
