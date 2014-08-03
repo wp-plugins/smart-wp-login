@@ -1,20 +1,20 @@
 === Smart WP Login ===
 Contributors: nishant_kumar
-Tags: login, registration, password, authentication, wp-login, email, smart
+Tags: login using email, registration using email, retrieve password using email, login, registration, password, authentication, wp-login, email, smart
 Requires at least: 3.0
 Tested up to: 3.9.1
 Stable tag: 0.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Customize WordPress login, registration or password reset system to work with 
-email only.
+Use email to login, register and retrieve password in WordPress.
 
 == Description ==
 Smart WP Login allows you to configure default WordPress Login, Registration or 
 Password Reset system to work with email and not username. You can enable this
 feature individually on Login, Registration or Password Reset. So you can make
-only **Login with Email** or only **Registration with Email**. 
+only **Login with Email**, **Registration with Email** or only **Retrieve Password
+using Email**. 
 
 Features
 
