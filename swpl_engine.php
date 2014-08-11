@@ -1,9 +1,17 @@
 <?php
 
+/**
+ * Frontend processing engine
+ *
+ * @author Nishant Kumar
+ */
+
 //No direct access allowed.
 if(!function_exists('add_action')){
-    echo 'Get Well Soon :)';
-    exit;
+    header( 'Status: 403 Forbidden' );
+    header( 'HTTP/1.1 403 Forbidden' );
+    echo 'Get Well Soon. :)';
+    exit();
 }
 
 class SWPL_Engine{
@@ -13,32 +21,29 @@ class SWPL_Engine{
      */
     public function __construct() {
         
-        //Add settings menu
-        add_action('admin_menu', array($this, 'constructMenu'));        
-        
         //Process Login
-        if(1 == get_option('swpl_l')){
+        if(SWPL_Settings::isLoginSmart()){
             //remove wordpress authentication
             remove_filter('authenticate', 'wp_authenticate_username_password', 20);
 
             //custom authentication function
-            add_filter('authenticate', array($this, 'swplAuthenticate'), 20, 3); 
+            add_filter('authenticate', array($this, 'callback_Authenticate'), 20, 3); 
 
-            //On login form, change "Username" to "Email"
-            add_action('login_form_login', array($this,'swplLoginFormLogin'));  
+            //Process Gettext for custom strings
+            add_action('login_form_login', array($this,'callback_LoginFormLogin'));  
         } 
         
         
         //Process Register
-        if(1 == get_option('swpl_r')){                
+        if(SWPL_Settings::isRegistrationSmart()){                
             //Assign email to username
-            add_action('login_form_register', array($this, 'swplLoginFormRegister'));
+            add_action('login_form_register', array($this, 'callback_LoginFormRegister'));
 
             //Remove error for username, show error for email only.
-            add_filter('registration_errors', array($this, 'swplRegistrationErrors'), 10, 3);
+            add_filter('registration_errors', array($this, 'callback_RegistrationErrors'), 10, 3);
 
             /**
-             * Add own style to registration form.
+             * Add customization to registration form.
              * Ref: 
              * http://codex.wordpress.org/Customizing_the_Login_Form
              * http://codex.wordpress.org/Function_Reference/wp_enqueue_script
@@ -46,99 +51,49 @@ class SWPL_Engine{
              */
             //>3.0.1 only
             //add_action('login_enqueue_scripts', array($this, 'swplLoginEnqueueScripts'));            
-            add_action('login_head', array($this, 'swplLoginEnqueueScripts'));            
+            add_action('login_head', array($this, 'callback_LoginEnqueueScripts'));            
         }
         
         
-        //Process Reset Password
-        if(1 == get_option('swpl_rp')){
-            add_action('login_form_lostpassword', array($this, 'swplLoginFormLostPassword'));
-            add_action('login_form_retrievepassword', array($this, 'swplLoginFormLostPassword'));
+        //Process Retrieve Password
+        if(SWPL_Settings::isRetrievePasswordSmart()){
+            add_action('login_form_lostpassword', array($this, 'callback_LoginFormLostPassword'));
+            add_action('login_form_retrievepassword', array($this, 'callback_LoginFormLostPassword'));
         }
     }
     
-    /**
-     * Adds menu item to WordPress admin menu
-     */
-    function constructMenu(){
-        add_options_page(
-                __('Smart WP Login', 'smart-wp-login'), 
-                'Smart WP Login', 
-                'manage_options', 
-                'smart-wp-login',
-                array($this, 'smartOptions'));
-    }
-   
-    /**
-     * Renders Settings Page
-     */
-    function smartOptions(){
-        if('post' == strtolower($_SERVER['REQUEST_METHOD'])){
-
-            $swpl_options = array('swpl_l', 'swpl_r', 'swpl_rp');
-
-            foreach($swpl_options as $option){
-                if(isset($_POST[$option]) && 1 == $_POST[$option]){
-                    update_option($option, true);
-                }else{
-                    update_option($option, false);
-                }
-            }
-
-            $message = 'Your preferences have been successfully saved.';
-        }
-    ?>
-    <div class="wrap">
-        <h2>Smart WP Login Settings</h2>
-        <?php
-            if(isset($message)){
-                echo '<div class="updated below-h2"><p>'.$message.'</p></div>';
-            }
-        ?>
-        <form action="<?php echo admin_url('options-general.php?page=smart-wp-login'); ?>" method="post">        
-            <label for="swpl_l">
-                <input type="checkbox" id="swpl_l" name="swpl_l" value="1" 
-                    <?php echo (1 == get_option('swpl_l'))? 'checked="checked"':''; ?>> Enable in Login
-            </label>
-            <br>
-            <label for="swpl_r">
-                <input type="checkbox" id="swpl_r" name="swpl_r" value="1"
-                    <?php echo (1 == get_option('swpl_r'))? 'checked="checked"':''; ?>> Enable in Registration
-            </label>
-            <br>
-            <label for="swpl_rp">
-                <input type="checkbox" id="swpl_rp" name="swpl_rp" value="1"
-                    <?php echo (1 == get_option('swpl_rp'))? 'checked="checked"':''; ?>> Enable in Password Reset
-            </label>
-            <br>
-            <p class="submit">
-                <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
-            </p>
-        </form>
-    </div>
-    <?php
-    }
-
     ############################################################################
     #  Login With Email
     ############################################################################
     
-    function swplAuthenticate($user, $email, $password){
+    public function callback_Authenticate($user, $email, $password){
 
         //Check for empty fields
         if(empty($email) || empty ($password)){        
             //create new error object and add errors to it.
             $error = new WP_Error();
+            
+            /*
+             * Added v1.0
+             * Don't know why, but WP doesn't show an error when both fields are empty.
+             * Thats why we are making it smart.
+             */
+            if('post' === strtolower($_SERVER['REQUEST_METHOD'])){
+                if(empty($email) && empty($password)){//Both fields are empty.
+                    $error->add('empty_username', SWPL_Settings::getString(SWPL_Settings::STRING_LOG_EMPTY_BOTH_FIELDS) );
+                    return $error;
+                }
+            }
 
             if(empty($email)){ //No email
-                $error->add('empty_username', __('<strong>ERROR</strong>: Email field is empty.'));
+                $error->add('empty_username', SWPL_Settings::getString(SWPL_Settings::STRING_LOG_EMPTY_EMAIL));
             }
             else if(!filter_var($email, FILTER_VALIDATE_EMAIL)){ //Invalid Email
-                $error->add('invalid_username', __('<strong>ERROR</strong>: Email is invalid.'));
+                $error->add('invalid_username', SWPL_Settings::getString(SWPL_Settings::STRING_LOG_INVALID_EMAIL));
             }
 
             if(empty($password)){ //No password
-                $error->add('empty_password', __('<strong>ERROR</strong>: Password field is empty.'));
+                $error->add('empty_password', SWPL_Settings::getString(SWPL_Settings::STRING_LOG_EMPTY_PASSWORD));
             }
 
             return $error;
@@ -150,13 +105,13 @@ class SWPL_Engine{
         //bad email
         if(!$user){
             $error = new WP_Error();
-            $error->add('invalid', __('<strong>ERROR</strong>: Either the email or password you entered is invalid.'));
+            $error->add('invalid', SWPL_Settings::getString(SWPL_Settings::STRING_LOG_INVALID_EMAIL_PASSWORD));
             return $error;
         }
         else{ //check password
             if(!wp_check_password($password, $user->user_pass, $user->ID)){ //bad password
                 $error = new WP_Error();
-                $error->add('invalid', __('<strong>ERROR</strong>: Either the email or password you entered is invalid.'));
+                $error->add('invalid', SWPL_Settings::getString(SWPL_Settings::STRING_LOG_INVALID_EMAIL_PASSWORD));
                 return $error;
             }else{
                 return $user; //passed
@@ -164,16 +119,22 @@ class SWPL_Engine{
         }
     }
     
-    function swplLoginFormLogin(){        
+    public function callback_LoginFormLogin(){        
         //Change "Username" text to "Email"
-        add_filter('gettext', array($this, 'swplLoginFormGettext'), 20, 3);
+        add_filter('gettext', array($this, 'callback_LoginFormGettext'), 20, 3);
     } 
     
-    function swplLoginFormGettext($translated_text, $text, $domain ){
+    public function callback_LoginFormGettext($translated_text, $text, $domain ){
         switch($translated_text){
             case 'Username': //For Login
                 $translated_text = 'Email';
                 break;
+            case 'Check your e-mail for the confirmation link.':
+                $translated_text = SWPL_Settings::getString(SWPL_Settings::STRING_RP_LOG_CHECK_EMAIL);
+                break;
+            case 'Registration complete. Please check your e-mail.':
+                $translated_text = SWPL_Settings::getString(SWPL_Settings::STRING_REG_LOG_REGISTRATION_COMPLETE);
+                break;                
         }
 
         return $translated_text;
@@ -185,13 +146,16 @@ class SWPL_Engine{
     #  Register With Email
     ############################################################################
     
-    function swplLoginFormRegister(){
+    public function callback_LoginFormRegister(){
         if(isset($_POST['user_login']) && isset($_POST['user_email']) && !empty($_POST['user_email'])){
             $_POST['user_login'] = $_POST['user_email'];
         }
+        
+        //Change Registration related text
+        add_filter('gettext', array($this, 'callback_RegisterGettext'), 20, 3); 
     }
     
-    function swplRegistrationErrors($wp_error, $sanitized_user_login, $user_email){
+    public function callback_RegistrationErrors($wp_error, $sanitized_user_login, $user_email){
         if(isset($wp_error->errors['empty_username'])){
             unset($wp_error->errors['empty_username']);
         }
@@ -202,7 +166,7 @@ class SWPL_Engine{
         return $wp_error;
     }
     
-    function swplLoginEnqueueScripts(){
+    public function callback_LoginEnqueueScripts(){
         //Don't show username field in register form.
         ?>
             <style>
@@ -221,12 +185,28 @@ class SWPL_Engine{
         <?php
     }
     
+    public function callback_RegisterGettext($translated_text, $text, $domain ){
+        switch($translated_text){
+            case '<strong>ERROR</strong>: Please type your e-mail address.':
+                $translated_text = SWPL_Settings::getString(SWPL_Settings::STRING_REG_EMPTY_EMAIL);
+                break;
+            case '<strong>ERROR</strong>: The email address isn&#8217;t correct.':
+                $translated_text = SWPL_Settings::getString(SWPL_Settings::STRING_REG_INVALID_EMAIL);
+                break;
+            case '<strong>ERROR</strong>: This email is already registered, please choose another one.':
+                $translated_text = SWPL_Settings::getString(SWPL_Settings::STRING_REG_REGISTERED_EMAIL);
+                break;
+        }
+
+        return $translated_text;
+    }
+    
 
     ############################################################################
     #  Reset Password With Email
     ############################################################################
     
-    function swplLoginFormLostPassword(){
+    public function callback_LoginFormLostPassword(){
         if('post' == strtolower($_SERVER['REQUEST_METHOD']) && isset($_POST['user_login'])){
             
             //To skip default wordpress processing.
@@ -234,45 +214,41 @@ class SWPL_Engine{
             global $errors;
             
             if(empty($_POST['user_login'])){
-                $errors->errors['empty_username'] = array('<strong>ERROR</strong>: Enter an e-mail address.');
+                $errors->errors['empty_username'] = array(SWPL_Settings::getString(SWPL_Settings::STRING_RP_EMPTY_EMAIL));
             
                 //In case of error, later restore previous REQUEST_METHOD value
-                add_action('lost_password', array($this, 'swplLostPassword'));
+                add_action('lost_password', array($this, 'callback_LostPassword'));
             }else if(!filter_var($_POST['user_login'], FILTER_VALIDATE_EMAIL)){
-                $errors->errors['invalid_combo'] = array('<strong>ERROR</strong>: Invalid e-mail.');
+                $errors->errors['invalid_combo'] = array(SWPL_Settings::getString(SWPL_Settings::STRING_RP_INVALID_EMAIL));
                             
                 //In case of error, later restore previous REQUEST_METHOD value
-                add_action('lost_password', array($this, 'swplLostPassword'));
+                add_action('lost_password', array($this, 'callback_LostPassword'));
             }else{ //Don't skip now
                 $_SERVER['REQUEST_METHOD'] = 'POST';
             }
         }
 
         //Change "Retrieve Password" related text
-        add_filter('gettext', array($this, 'swplLostPasswordGettext'), 20, 3); 
+        add_filter('gettext', array($this, 'callback_LostPasswordGettext'), 20, 3); 
     }    
     
-    function swplLostPassword(){
+    public function callback_LostPassword(){
         //Restore right value
         $_SERVER['REQUEST_METHOD'] = 'POST';
     }
     
-    function swplLostPasswordGettext($translated_text, $text, $domain ){
+    public function callback_LostPasswordGettext($translated_text, $text, $domain ){
         switch($translated_text){
             case 'Please enter your username or e-mail address. You will receive a new password via e-mail.':
             case 'Please enter your username or email address. You will receive a link to create a new password via email.':
-                $translated_text = 'Please enter your email address. You will receive a link to create a new password via email.';
+                $translated_text = SWPL_Settings::getString(SWPL_Settings::STRING_RP_NOTIFICATION);
+                //$translated_text = 'Please enter your email address. You will receive a link to create a new password via email.';
                 break;
-            /* No need, we have custom message above this snippet
-            case '<strong>ERROR</strong>: Enter a username or e-mail address.';
-                $translated_text = '<strong>ERROR</strong>: Enter an e-mail address.';
-                break;
-            */
-            case '<strong>ERROR</strong>: Invalid username or e-mail.':
-                $translated_text = '<strong>ERROR</strong>: Invalid e-mail.';
+            case '<strong>ERROR</strong>: There is no user registered with that email address.':
+                $translated_text = SWPL_Settings::getString(SWPL_Settings::STRING_RP_NO_USER_REGISTERED);
                 break;
             case 'Username or E-mail:':
-                $translated_text = 'E-mail:';
+                $translated_text = __('E-mail:', 'smart-wp-login');
                 break;
         }
 

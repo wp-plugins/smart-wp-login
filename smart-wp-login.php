@@ -1,12 +1,11 @@
 <?php
 /**
- * @package SWPL
- */
-/**
  * Plugin Name: Smart WP Login
- * Version: 0.9
+ * Version: 1.0
  * Author: Nishant Kumar
- * Description: Now with Smart WP Login, you can configure WordPress to login, register and reset password using e-mail only.
+ * Author URI: http://thebinary.in/
+ * Text Domain: smart-wp-login
+ * Description: Use email to login, register and retrieve password in WordPress.
  */
 
 /*
@@ -27,25 +26,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //No direct access allowed.
 if(!function_exists('add_action')){
-    echo 'Get Well Soon :)';
-    exit;
+    header( 'Status: 403 Forbidden' );
+    header( 'HTTP/1.1 403 Forbidden' );
+    echo 'Get Well Soon. :)';
+    exit();
 }
 
-register_activation_hook(__FILE__, 'swpl_activation');
-function swpl_activation(){
-    if(false === get_option('swpl_l')){
-        add_option('swpl_l', '1');
-    }
-        
-    if(false === get_option('swpl_r')){
-        add_option('swpl_r', '1');
-    }
-    
-    if(false === get_option('swpl_rp')){
-        add_option('swpl_rp', '1');
-    }
-}
+//global constants
+define('SWPL_VERSION', '1.0');
+define('SWPL_URL', plugin_dir_url(__FILE__));
 
+//load required files
+require 'swpl_settings.php';
 require 'swpl_engine.php';
 
+//Go Go Go
+new SWPL_Settings();
 new SWPL_Engine();
