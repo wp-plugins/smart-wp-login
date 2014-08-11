@@ -49,7 +49,6 @@ doesn't show username in error message.
 1. A complete plugin renovation from the ground.
 1. Now you can also set custom error message.
 1. Shows error message when both email and password is empty in login form.
-1. Support for i18n
 
 = 0.9 =
 Lets get start
