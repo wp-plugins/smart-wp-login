@@ -1,0 +1,83 @@
+/* 
+    Created on : 9 Aug, 2014, 11:56:01 AM
+    Author     : Nishant Kumar
+    Description: CSS used by Smart WP Login admin interface
+*/
+
+.swpl-plug-page h2{
+    padding:0;
+    margin-bottom:10px;
+    border-bottom:solid 3px #cbe2ec;
+    text-align: center;
+}
+
+.swpl-plug-page .updated{
+    background-color:#cfffb3;
+}
+
+.swpl-plug-page .content{
+    width:60%;
+    margin-right: 5%;
+}
+
+.swpl-plug-page .sidebar{
+    width:35%;
+}
+
+.swpl-plug-page .content,
+.swpl-plug-page .sidebar{
+    padding:30px;
+    background-color:#fefefe;
+    box-shadow: 0px 0px 4px #94cde7;
+
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+.swpl-plug-page .form-table{
+    margin-bottom:20px;
+    border-bottom:solid 1px #cbe2ec;
+}
+
+.legend{
+    width:14px;
+    height:14px;
+    font-size:10px;
+    line-height:14px;
+    text-align:center;
+    display:inline-block;
+    color:white;
+}
+
+.legend.login{
+    background-color:red;
+}
+
+.legend.registration{
+    background-color:orange;
+}
+
+.legend.retrieve-pass{
+    background-color:green;
+}
+
+.swpl-plug-page .follow{
+    text-align: center;
+    line-height: 80px;
+}
+
+.swpl-plug-page .follow a{
+    text-decoration: none;
+    font-weight:bold;
+    font-size:80px;
+}
+
+.swpl-plug-page .follow a.facebook{
+    color:#45619d;
+}
+
+.swpl-plug-page .follow a.twitter{
+    color:#55acee;
+    margin-left:30px;
+}
