@@ -149,9 +149,6 @@ class SWPL_Settings {
                 ?>
                 <input type="submit" class="button button-primary" value="<?php _e('Save', 'smart-wp-login'); ?>">
             </form>
-            <div style="text-align:center; margin-top:30px;">
-                <a href="http://www.arvixe.com/8375-27-1-434.html" target="_blank"><img border="0" src="https://affiliates.arvixe.com/banners/600.77.Wordpress..gif" width="600" height="77" alt=""></a>
-            </div>
         </div>
         <div class="sidebar alignleft">
             <h2>About</h2>
