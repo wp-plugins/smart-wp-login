@@ -44,6 +44,9 @@ doesn't show username in error message.
 
 == Changelog ==
 
+= 1.0.1 =
+Minor Changes
+
 = 1.0 =
 
 1. A complete plugin renovation from the ground.
