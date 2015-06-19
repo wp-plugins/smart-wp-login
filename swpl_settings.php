@@ -99,7 +99,7 @@ class SWPL_Settings {
                     $swpl_settings['swpl_enable_login'] = 'on';
                     $swpl_settings['swpl_enable_registration'] = 'on';
                     $swpl_settings['swpl_enable_retrieve_password'] = 'on';
-                }else{ //o.9 options are there.
+                }else{ //0.9 options are there.
                     if($swpl_0_9['swpl_l']){
                         $swpl_settings['swpl_enable_login'] = 'on';
                     }
@@ -154,10 +154,23 @@ class SWPL_Settings {
             <h2>About</h2>
             <p>Smart WP Login is developed by me, Nishant Kumar.</p>
             <p>I am a web developer and like to accept challenges. You can read my latest posts at <a target="_blank" href="http://www.thebinary.in">http://www.thebinary.in</a></p>
-            <p class="follow">
-                <a class="facebook" target="_blank" title="Follow me on Facebook" href="http://www.facebook.com/thebinary.in">f</a>
-                <a class="twitter" target="_blank" title="Follow me on Twitter" href="http://www.twitter.com/9_n_k">t</a>
-            </p>
+            <ul class="follow">
+                <li>
+                    <a class="facebook" target="_blank" title="Follow me on Facebook" href="https://www.facebook.com/thebinary.in">
+                        <img src="<?php echo SWPL_URL.'asset/images/fb-ico.jpg' ?>" alt="Facebook">
+                    </a>
+                </li>
+                <li>
+                    <a class="twitter" target="_blank" title="Follow me on Twitter" href="https://twitter.com/9_nishant_kumar">
+                        <img src="<?php echo SWPL_URL.'asset/images/twitter-ico.jpg' ?>" alt="Twitter">
+                    </a>
+                </li>
+                <li>
+                    <a class="twitter" target="_blank" title="WordPress Profile" href="https://profiles.wordpress.org/nishant_kumar">
+                        <img src="<?php echo SWPL_URL.'asset/images/wp-ico.jpg' ?>" alt="WordPress">
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </div>

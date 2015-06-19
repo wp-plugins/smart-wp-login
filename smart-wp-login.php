@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Smart WP Login
- * Version: 1.0
+ * Version: 1.0.2
  * Author: Nishant Kumar
  * Author URI: http://thebinary.in/
  * Text Domain: smart-wp-login
@@ -33,12 +33,13 @@ if(!function_exists('add_action')){
 }
 
 //global constants
-define('SWPL_VERSION', '1.0');
+define('SWPL_VERSION', '1.0.2');
 define('SWPL_URL', plugin_dir_url(__FILE__));
 
 //load required files
 require 'swpl_settings.php';
 require 'swpl_engine.php';
+require 'swpl_overrides_wp.php';
 
 //Go Go Go
 new SWPL_Settings();
