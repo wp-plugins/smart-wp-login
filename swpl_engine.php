@@ -51,7 +51,8 @@ class SWPL_Engine{
              */
             //>3.0.1 only
             //add_action('login_enqueue_scripts', array($this, 'swplLoginEnqueueScripts'));            
-            add_action('login_head', array($this, 'callback_LoginEnqueueScripts'));            
+            add_action('login_head', array($this, 'callback_LoginHead'));           
+            add_action('login_footer', array($this, 'callback_LoginFooter'));
         }
         
         
@@ -66,6 +67,9 @@ class SWPL_Engine{
     #  Login With Email
     ############################################################################
     
+    /**
+     * Custom Authentication function
+     */
     public function callback_Authenticate($user, $email, $password){
 
         //Check for empty fields
@@ -119,6 +123,9 @@ class SWPL_Engine{
         }
     }
     
+    /**
+     * Return custom string message
+     */
     public function callback_LoginFormLogin(){        
         //Change "Username" text to "Email"
         add_filter('gettext', array($this, 'callback_LoginFormGettext'), 20, 3);
@@ -146,15 +153,42 @@ class SWPL_Engine{
     #  Register With Email
     ############################################################################
     
+    /**
+     * Hook to registration system,
+     * Now the tweak goes here.
+     * Username: As WP registration requires username, we need to provide a username while
+     * registering. So we assign local part of email as username, ex: demo#demo@example.com
+     * and username would be demodemo (no special chars).
+     * 
+     * Duplicate Username: In case username already exists, system tries to change
+     * username by adding a random number as suffix. Random number is between
+     * 1 to 999. Ex: demodemo_567
+     */
     public function callback_LoginFormRegister(){
         if(isset($_POST['user_login']) && isset($_POST['user_email']) && !empty($_POST['user_email'])){
-            $_POST['user_login'] = $_POST['user_email'];
+            //In case user email contains single quote ', WP will add a slash automatically. Yes, emails can use special chars, see RFC 5322
+            $_POST['user_email'] = stripslashes($_POST['user_email']);
+            
+            // Split out the local and domain parts
+            list( $local, ) = explode( '@', $_POST['user_email'], 2 );
+        
+            //Sanitize special characters in email fields, if any. Yes, emails can use special chars, see RFC 5322
+            $_POST['user_login'] = sanitize_user($local, true);
+            
+            $pre_change = $_POST['user_login'];
+            //In case username already exists, change it
+            while(username_exists($_POST['user_login'])){
+                $_POST['user_login'] = $pre_change . '_' . rand(1, 999);
+            }
         }
         
         //Change Registration related text
         add_filter('gettext', array($this, 'callback_RegisterGettext'), 20, 3); 
     }
     
+    /**
+     * Remove registration message for username
+     */
     public function callback_RegistrationErrors($wp_error, $sanitized_user_login, $user_email){
         if(isset($wp_error->errors['empty_username'])){
             unset($wp_error->errors['empty_username']);
@@ -166,7 +200,10 @@ class SWPL_Engine{
         return $wp_error;
     }
     
-    public function callback_LoginEnqueueScripts(){
+    /**
+     * Bit tweaking to hide username field
+     */
+    public function callback_LoginHead(){
         //Don't show username field in register form.
         ?>
             <style>
@@ -175,14 +212,25 @@ class SWPL_Engine{
                     display:none;
                 }
             </style>
-
-            <script type="text/javascript" src="<?php echo site_url('/wp-includes/js/jquery/jquery.js'); ?>"></script>
+        <?php
+    }
+    
+    /**
+     * Just a backup to remove username field, although css is suffice
+     */
+    public function callback_LoginFooter(){
+        ?>
             <script type="text/javascript">
-                jQuery(document).ready(function($){
-                    $('#registerform > p:first-child').css('display', 'none');
-                });
+                try{
+                    var swpl_username_p = document.getElementById('registerform').children[0];
+                    swpl_username_p.style.display = 'none';
+                }catch(e){}
+                
+                //Focus email
+                try{document.getElementById('user_email').focus();}catch(e){}
             </script>
         <?php
+        
     }
     
     public function callback_RegisterGettext($translated_text, $text, $domain ){

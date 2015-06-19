@@ -62,22 +62,12 @@
     background-color:green;
 }
 
-.swpl-plug-page .follow{
-    text-align: center;
-    line-height: 80px;
+.swpl-plug-page ul.follow{
+    list-style: none;
+    margin-top:25px
 }
 
-.swpl-plug-page .follow a{
-    text-decoration: none;
-    font-weight:bold;
-    font-size:80px;
-}
-
-.swpl-plug-page .follow a.facebook{
-    color:#45619d;
-}
-
-.swpl-plug-page .follow a.twitter{
-    color:#55acee;
-    margin-left:30px;
+.swpl-plug-page  ul.follow li{
+    float:left;
+    margin-right:10px
 }

@@ -2,23 +2,23 @@
 Contributors: nishant_kumar
 Tags: login using email, registration using email, retrieve password using email, 
 remove username, login, registration, password, authentication, wp-login, email, smart
-Requires at least: 3.0
-Tested up to: 3.9.2
-Stable tag: 1.0.1
+Requires at least: 3.1.0
+Tested up to: 4.2.2
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Use email to login, register and retrieve password in WordPress.
 
 == Description ==
+
 Smart WP Login allows you to configure default WordPress Login, Registration or 
 Password Reset system to work with email and not username. You can enable this
 feature individually on Login, Registration or Retrieve Password. So you can make
 only **Login using Email**, **Registration using Email** or **Retrieve Password
 using Email**. 
 
-Features
-
+= Features =
 * Enables you to use email instead of username to login, register or retrieve 
 password.
 * Removes username field from WordPress login.
@@ -27,6 +27,9 @@ password.
 doesn't show username in error message.
 * You can also change login, registration and retrieve password related message.
 
+= Note =
+Smart WP Login generates username automatically. Please see our FAQ section to 
+learn how it generates username.
 
 == Installation ==
 
@@ -38,11 +41,33 @@ doesn't show username in error message.
 
 1. Login using Email
 2. Error message for login
-3. Wow, good error message, no WordPress default error
+3. Wow, custom error message, no WordPress default error
 4. Register using Email
 5. Retrieve password using Email
 
+== FAQ ==
+= What happens to username? How does this plugin generates username? =
+
+WordPress registration system requires a username while registering a new user.
+Adhering to WP rules, Smart WP Login provides a username on behalf of user.
+It assigns local part of email as username, ex: if user registers with 
+demo#demo@example.com, its username would be demodemo (no special chars).
+
+= What happens if username already exists? =
+
+In case username already exists, system tries to change username by adding a 
+random number as suffix. Random number is between 1 to 999. Ex: if user registers
+with demo$demo@example.com, and username demodemo already exists, its username
+would be demodemo_546.
+
 == Changelog ==
+
+= 1.0.2 =
+1. Improved registration mechanism.
+1. Upon registration user receives an email with username, email and password,
+previously only username and password was sent.
+1. Focuses email field when page loads.
+1. No jQuery dependency.
 
 = 1.0.1 =
 Minor Changes
@@ -59,5 +84,6 @@ Lets get start
 
 == Upgrade Notice ==
 
-= 1.0 =
-Upgrade now to set custom message on login, registration and retrieve password screen.
+= 1.0.2 =
+Upgrade now so your users can also receive email in their registration mail, also
+lot of enhancements.
